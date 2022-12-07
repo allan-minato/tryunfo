@@ -97,7 +97,7 @@ class Form extends React.Component {
           <p>Raridade:</p>
           <select
             data-testid="rare-input"
-            name="cardRare"
+            name={ cardRare }
             id="rare-input"
             value={ cardRare }
             onChange={ onInputChange }
