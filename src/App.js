@@ -1,43 +1,75 @@
 import React from 'react';
-import Form from './components/Form';
 import Card from './components/Card';
+import Form from './components/Form';
 
 class App extends React.Component {
   state = {
     cardName: '',
     cardDescription: '',
-    cardAttr1: '',
-    cardAttr2: '',
-    cardAttr3: '',
+    cardAttr1: '0',
+    cardAttr2: '0',
+    cardAttr3: '0',
     cardImage: '',
     cardRare: 'normal',
     cardTrunfo: false,
-    hasTrunfo: false,
     isSaveButtonDisabled: true,
     allCards: [],
   };
+  // state = {
+  //   ...istate,
+  // };
 
-  onSaveButtonClick = () => {
-    const maxValue = 90;
-    const sumValue = 210;
-    const { cardName, cardDescription, cardImage,
-      cardAttr1, cardAttr2, cardAttr3 } = this.state;
+  handleChange = ({ target }) => {
+    const { name } = target;
+    const value = target.type === 'checkbox' ? target.checked : target.value;
 
-    const validationCard = cardName.length > 0;
-    const validationDescription = cardDescription.length > 0;
-    const validationImage = cardImage.length > 0;
-    const validationAttr1 = parseInt(cardAttr1, 10)
-    <= maxValue && parseInt(cardAttr1, 10) >= 0;
-    const validationAttr2 = parseInt(cardAttr2, 10)
-    <= maxValue && parseInt(cardAttr2, 10) >= 0;
-    const validationAttr3 = parseInt(cardAttr3, 10)
-    <= maxValue && parseInt(cardAttr3, 10) >= 0;
-    const sum = parseInt(cardAttr1, 10)
-    + parseInt(cardAttr2, 10) + parseInt(cardAttr3, 10) <= sumValue;
+    this.setState({
+      [name]: value,
+    }, this.validateForm);
+  };
 
-    this.setState({ isSaveButtonDisabled: !(validationCard
-      && validationDescription && validationImage
-      && validationAttr1 && validationAttr2 && validationAttr3 && sum) });
+  validateInput = () => {
+    const {
+      cardName,
+      cardDescription,
+      cardImage,
+      cardRare,
+    } = this.state;
+    return (
+      cardName !== '' && cardDescription !== '' && cardImage !== '' && cardRare !== ''
+    );
+  };
+
+  validateAttr = () => {
+    const {
+      cardAttr1,
+      cardAttr2,
+      cardAttr3,
+    } = this.state;
+    const maxSum = 210;
+    const maxAtrib = 90;
+    const minAtrib = 0;
+    const sumAtrib = parseInt(cardAttr1, 10)
+    + parseInt(cardAttr2, 10)
+    + parseInt(cardAttr3, 10);
+
+    if (parseInt(cardAttr1, 10) >= minAtrib
+    && parseInt(cardAttr1, 10) <= maxAtrib
+    && parseInt(cardAttr2, 10) >= minAtrib
+    && parseInt(cardAttr2, 10) <= maxAtrib
+    && parseInt(cardAttr3, 10) >= minAtrib
+    && parseInt(cardAttr3, 10) <= maxAtrib
+    && sumAtrib <= maxSum) {
+      return true;
+    }
+  };
+
+  validateForm = () => {
+    if (this.validateInput() && this.validateAttr()) {
+      this.setState({ isSaveButtonDisabled: false });
+    } else {
+      this.setState({ isSaveButtonDisabled: true });
+    }
   };
 
   saveCards = (event) => {
@@ -51,6 +83,7 @@ class App extends React.Component {
       cardImage,
       cardRare,
       cardTrunfo,
+      allCards,
     } = this.state;
 
     const generateNewCard = {
@@ -63,6 +96,10 @@ class App extends React.Component {
       cardRare,
       cardTrunfo,
     };
+    if (allCards.every((cards) => (cards.hasTrunfo))) {
+      this.setState({ hasTrunfo: true });
+    }
+
     this.setState((prevState) => ({
       allCards: [...prevState.allCards, generateNewCard],
       cardName: '',
@@ -77,26 +114,50 @@ class App extends React.Component {
     }));
   };
 
-  onInputChange = ({ target }) => {
-    const { value, name, checked, type } = target;
-    this.setState({
-      [name]: type === 'checkbox' ? checked : value,
-    }, () => this.onSaveButtonClick());
-  };
-
   render() {
+    const {
+      cardName,
+      cardDescription,
+      cardAttr1,
+      cardAttr2,
+      cardAttr3,
+      cardImage,
+      cardRare,
+      cardTrunfo,
+      hasTrunfo,
+      isSaveButtonDisabled,
+    } = this.state;
     return (
       <div>
         <h1>Tryunfo</h1>
         <Form
-          { ...this.state }
-          onSaveButtonClick={ this.onSaveButtonClick && this.saveCards }
-          onInputChange={ this.onInputChange }
+          cardName={ cardName }
+          cardDescription={ cardDescription }
+          cardAttr1={ cardAttr1 }
+          cardAttr2={ cardAttr2 }
+          cardAttr3={ cardAttr3 }
+          cardImage={ cardImage }
+          cardRare={ cardRare }
+          cardTrunfo={ cardTrunfo }
+          onInputChange={ this.handleChange }
+          hasTrunfo={ hasTrunfo }
+          isSaveButtonDisabled={ isSaveButtonDisabled }
+          onSaveButtonClick={ this.saveCards }
         />
-        <Card { ...this.state } />
+        <Card
+          cardName={ cardName }
+          cardDescription={ cardDescription }
+          cardAttr1={ cardAttr1 }
+          cardAttr2={ cardAttr2 }
+          cardAttr3={ cardAttr3 }
+          cardImage={ cardImage }
+          cardRare={ cardRare }
+          cardTrunfo={ cardTrunfo }
+        />
       </div>
     );
   }
 }
 
 export default App;
+
